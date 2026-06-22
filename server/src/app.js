@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const env = require('./config/env');
 const connectDB = require('./config/db');
 const routes = require('./routes');
+const seoRoutes = require('./routes/seo.routes');
 const errorHandler = require('./middleware/errorHandler');
 const { globalApiLimiter } = require('./middleware/rateLimiter');
 
@@ -77,7 +78,10 @@ app.use(csrfCheck);
 // Global Rate Limiting
 app.use('/api/', globalApiLimiter);
 
-// Mount Routes
+// Mount SEO Routes (Root Level)
+app.use('/', seoRoutes);
+
+// Mount API Routes
 app.use('/api', routes);
 
 // 404 Handler
