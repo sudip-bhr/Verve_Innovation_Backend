@@ -69,7 +69,15 @@ app.use(cookieParser()); // Parse cookies
 app.use(compression()); // Gzip compression
 
 // Data Sanitization against NoSQL query injection
-app.use(mongoSanitize());
+// Custom wrapper for express-mongo-sanitize to avoid Express 5 'getter only' error on req.query
+app.use((req, res, next) => {
+  ['body', 'params', 'query', 'headers'].forEach((k) => {
+    if (req[k]) {
+      mongoSanitize.sanitize(req[k]);
+    }
+  });
+  next();
+});
 
 // Serve static uploads folder
 const path = require('path');
