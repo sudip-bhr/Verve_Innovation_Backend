@@ -61,10 +61,15 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+const mongoSanitize = require('express-mongo-sanitize');
+
 app.use(express.json()); // Parse JSON body
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // Parse cookies
 app.use(compression()); // Gzip compression
+
+// Data Sanitization against NoSQL query injection
+app.use(mongoSanitize());
 
 // Serve static uploads folder
 const path = require('path');

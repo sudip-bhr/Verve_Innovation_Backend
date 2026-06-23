@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-mongoose.set('sanitizeFilter', true); // Prevent NoSQL injection
 
 const connectDB = async () => {
   try {
