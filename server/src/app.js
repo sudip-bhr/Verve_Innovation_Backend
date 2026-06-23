@@ -15,6 +15,14 @@ const { globalApiLimiter } = require('./middleware/rateLimiter');
 // Initialize Express app
 const app = express();
 
+// Trust Render's reverse proxy for correct IP detection
+app.set('trust proxy', 1);
+
+// Health check for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Connect to MongoDB
 connectDB();
 
@@ -23,7 +31,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "http://localhost:5001", "http://localhost:5173", process.env.CLIENT_ORIGIN || "http://localhost:5173"], 
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", process.env.CLIENT_ORIGIN || "http://localhost:5173"], 
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       connectSrc: ["'self'", process.env.CLIENT_ORIGIN || 'http://localhost:5173']
@@ -33,8 +41,21 @@ app.use(helmet({
   strictTransportSecurity: { maxAge: 63072000, includeSubDomains: true, preload: true }
 }));
 
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN,
+  process.env.CLIENT_ORIGIN ? process.env.CLIENT_ORIGIN.replace(/\/$/, '') : null,
+  'http://localhost:5173',
+  'https://verve-innovation.vercel.app'
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 };

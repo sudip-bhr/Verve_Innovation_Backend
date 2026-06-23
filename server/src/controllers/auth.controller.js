@@ -49,14 +49,16 @@ exports.login = async (req, res) => {
     res.cookie('verve_admin_token', token, {
       httpOnly: true,
       secure: isProd,
-      sameSite: 'strict',
+      sameSite: isProd ? 'None' : 'lax',
+      path: '/',
       maxAge: 1000 * 60 * 60 * 8 // 8 hours
     });
 
     res.cookie('csrf_token', csrfToken, {
       httpOnly: false,
       secure: isProd,
-      sameSite: 'strict',
+      sameSite: isProd ? 'None' : 'lax',
+      path: '/',
       maxAge: 1000 * 60 * 60 * 8
     });
 
@@ -71,12 +73,14 @@ exports.logout = (req, res) => {
   res.clearCookie('verve_admin_token', {
     httpOnly: true,
     secure: isProd,
-    sameSite: 'strict'
+    sameSite: isProd ? 'None' : 'lax',
+    path: '/'
   });
   res.clearCookie('csrf_token', {
     httpOnly: false,
     secure: isProd,
-    sameSite: 'strict'
+    sameSite: isProd ? 'None' : 'lax',
+    path: '/'
   });
   res.json({ success: true });
 };
