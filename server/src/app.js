@@ -91,12 +91,17 @@ if (env.nodeEnv === 'development') {
 const csrfCheck = (req, res, next) => {
   const mutatingMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
   if (mutatingMethods.includes(req.method)) {
+    // Bearer tokens are not vulnerable to CSRF — skip check
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      return next();
+    }
+
     // Skip CSRF for login/logout and public contact
     if (req.path.startsWith('/api/auth/') || req.path === '/api/contact') {
       return next();
     }
     
-    // If the user has an admin token, enforce CSRF
+    // If the user has an admin token cookie, enforce CSRF
     if (req.cookies && req.cookies.verve_admin_token) {
       const cookieToken = req.cookies.csrf_token;
       const headerToken = req.headers['x-csrf-token'];

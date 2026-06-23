@@ -8,7 +8,14 @@ const env = require('../config/env');
 
 function adminAuth(requiredRole = null) {
   return (req, res, next) => {
-    const token = req.cookies.verve_admin_token;
+    // Check Bearer token first (cross-domain), then fall back to cookie (same-domain/local)
+    let token;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1];
+    } else {
+      token = req.cookies.verve_admin_token;
+    }
     if (!token) return res.status(401).json({ error: 'Not authenticated' });
 
     try {

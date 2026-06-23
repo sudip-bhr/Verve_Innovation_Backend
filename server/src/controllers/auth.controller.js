@@ -62,7 +62,7 @@ exports.login = async (req, res) => {
       maxAge: 1000 * 60 * 60 * 8
     });
 
-    res.json({ success: true, role: adminUser.role });
+    res.json({ success: true, role: adminUser.role, token, csrfToken });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });
   }
